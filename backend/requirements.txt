@@ -10,3 +10,5 @@ passlib
 argon2-cffi
 alembic
 pydantic-settings
+email-validator
+python-multipart
