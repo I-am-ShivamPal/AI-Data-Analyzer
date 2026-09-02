@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -585,7 +586,8 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden font-sans selection:bg-blue-500/30">
+    <ProtectedRoute>
+      <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden font-sans selection:bg-blue-500/30">
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-900/10 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] rounded-full bg-blue-800/10 blur-[100px]" />
@@ -819,6 +821,7 @@ export default function SettingsPage() {
         </div>
       </Modal>
 
-    </div>
+        </div>
+    </ProtectedRoute>
   );
 }

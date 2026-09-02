@@ -107,3 +107,18 @@ def revoke_session(db: Session, session_id: str):
         session.is_active = False
         session.revoked_at = datetime.utcnow()
         db.commit()
+
+def revoke_all_sessions_for_user(db: Session, user_id: str):
+    """Revoke all active sessions for a specific user. Useful after password resets."""
+    active_sessions = db.query(DBSession).filter(
+        DBSession.user_id == user_id,
+        DBSession.is_active == True,
+        DBSession.expires_at > datetime.utcnow()
+    ).all()
+    
+    for session in active_sessions:
+        session.is_active = False
+        session.revoked_at = datetime.utcnow()
+        
+    if active_sessions:
+        db.commit()

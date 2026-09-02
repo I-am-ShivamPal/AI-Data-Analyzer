@@ -18,6 +18,7 @@ import {
   Circle,
   RefreshCw,
 } from "lucide-react";
+import { authService } from "@/lib/auth";
 
 // ---------------------------------------------------------------------------
 // Types & constants
@@ -348,11 +349,15 @@ export default function ForgotPasswordPage() {
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError]     = useState<string | null>(null);
 
+  // ── Tokens ──
+  const [challengeId, setChallengeId]   = useState<string | null>(null);
+  const [resetToken, setResetToken]     = useState<string | null>(null);
+
   // ─────────────────────────────────────────────────────────────────────────
   // Step 1 handlers
   // ─────────────────────────────────────────────────────────────────────────
 
-  function handleLookup(e: React.FormEvent) {
+  async function handleLookup(e: React.FormEvent) {
     e.preventDefault();
     setLookupError(null);
     if (!contact.trim()) {
@@ -360,12 +365,12 @@ export default function ForgotPasswordPage() {
       return;
     }
     setLookupState("checking");
-    setTimeout(() => {
-      // Mock: anything with "@" or 7+ digits = "found"
-      const hasAt    = contact.includes("@");
-      const hasPhone = contact.replace(/\D/g, "").length >= 7;
-      if (hasAt || hasPhone) {
+    
+    try {
+      const res = await authService.forgotPassword({ contact });
+      if (res.challenge_id) {
         setLookupState("found");
+        setChallengeId(res.challenge_id);
         setTimeout(() => {
           setStep(2);
           setTimerActive(true);
@@ -373,7 +378,10 @@ export default function ForgotPasswordPage() {
       } else {
         setLookupState("not-found");
       }
-    }, 1800);
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      setLookupState("idle");
+      setLookupError(error.response?.data?.detail || "An error occurred. Please try again.");
+    }
   }
 
   function handleRetry() {
@@ -388,34 +396,46 @@ export default function ForgotPasswordPage() {
 
   const otpComplete = otp.every((d) => d !== "");
 
-  function handleVerifyOtp(e: React.FormEvent) {
+  async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setOtpError(null);
     if (!otpComplete) {
       setOtpError("Please enter all 6 digits.");
       return;
     }
+    if (!challengeId) return;
+    
     setOtpLoading(true);
-    setTimeout(() => {
-      setOtpLoading(false);
-      // Mock: any 6-digit code advances the flow
+    
+    try {
+      const res = await authService.verifyResetOTP({ challenge_id: challengeId, otp: otp.join("") });
+      setResetToken(res.reset_token);
       setStep(3);
-    }, 1500);
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      setOtpError(error.response?.data?.detail || "Invalid verification code.");
+    } finally {
+      setOtpLoading(false);
+    }
   }
 
-  function handleResend() {
-    if (!timer.expired) return;
-    setOtp(Array(6).fill(""));
+  async function handleResend() {
+    if (!timer.expired || !challengeId) return;
     setOtpError(null);
-    setTimerActive(false);
-    setTimeout(() => setTimerActive(true), 50);
+    try {
+      await authService.resendResetOTP({ challenge_id: challengeId });
+      setOtp(Array(6).fill(""));
+      setTimerActive(false);
+      setTimeout(() => setTimerActive(true), 50);
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      setOtpError(error.response?.data?.detail || "Could not resend code.");
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
   // Step 3 handlers
   // ─────────────────────────────────────────────────────────────────────────
 
-  function handleReset(e: React.FormEvent) {
+  async function handleReset(e: React.FormEvent) {
     e.preventDefault();
     setResetError(null);
     if (!newPw || !confirmPw) {
@@ -431,11 +451,22 @@ export default function ForgotPasswordPage() {
       setResetError("Your password does not meet all requirements.");
       return;
     }
+    if (!resetToken) return;
+    
     setResetLoading(true);
-    setTimeout(() => {
-      setResetLoading(false);
+    
+    try {
+      await authService.resetPassword({
+        reset_token: resetToken,
+        new_password: newPw,
+        confirm_password: confirmPw
+      });
       setStep(4);
-    }, 2000);
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      setResetError(error.response?.data?.detail || "An error occurred while resetting your password.");
+    } finally {
+      setResetLoading(false);
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────

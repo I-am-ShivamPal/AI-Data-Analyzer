@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authService } from "@/lib/auth";
+import { useAuth } from "@/providers/AuthProvider";
 import {
   BarChart3,
   Mail,
@@ -99,8 +102,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /** Mock submit - no real auth in this UI phase */
-  function handleSubmit(e: React.FormEvent) {
+  const router = useRouter();
+  const { refreshUser } = useAuth();
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
@@ -110,10 +115,20 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await authService.login({ email, password });
+      const user = await authService.getCurrentUser();
+      await refreshUser();
+      
+      if (user.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      setError(err.message || "Invalid email or password.");
       setIsLoading(false);
-      setError("Invalid email or password. (Mock -- backend not connected)");
-    }, 2000);
+    }
   }
 
   return (
@@ -326,7 +341,7 @@ export default function LoginPage() {
 
                   {/* Forgot password */}
                   <Link
-                    href="#"
+                    href="/forgot-password"
                     className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:rounded"
                     aria-label="Forgot password"
                   >
@@ -366,7 +381,7 @@ export default function LoginPage() {
               <p className="text-center text-sm text-slate-400">
                 {"Don't have an account? "}
                 <Link
-                  href="#"
+                  href="/register"
                   className="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:rounded"
                   aria-label="Create a new account"
                 >

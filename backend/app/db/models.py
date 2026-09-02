@@ -25,6 +25,7 @@ class User(Base):
 
     sessions = relationship("Session", back_populates="user")
     datasets = relationship("Dataset", back_populates="user")
+    reset_challenges = relationship("PasswordResetChallenge", back_populates="user")
 
 
 class Session(Base):
@@ -67,3 +68,28 @@ class Dataset(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
     user = relationship("User", back_populates="datasets")
+
+class PasswordResetChallenge(Base):
+    __tablename__ = "password_reset_challenges"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    contact_type = Column(String, nullable=False) # 'email' or 'phone'
+    contact_value = Column(String, nullable=False)
+    otp_hash = Column(String, nullable=False)
+    reset_token_hash = Column(String, nullable=True)
+    
+    expires_at = Column(DateTime, nullable=False)
+    
+    attempt_count = Column(Integer, default=0, nullable=False)
+    max_attempts = Column(Integer, default=5, nullable=False)
+    resend_count = Column(Integer, default=0, nullable=False)
+    
+    verified_at = Column(DateTime, nullable=True)
+    used_at = Column(DateTime, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_sent_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    user = relationship("User", back_populates="reset_challenges")
+

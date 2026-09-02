@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { authService } from "@/lib/auth";
 import {
   BarChart3,
   User,
@@ -151,8 +152,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  /** Mock submit -- UI phase only, no backend */
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
@@ -170,10 +170,18 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await authService.register({
+        name: fullName,
+        email,
+        password,
+      });
       setSuccess(true);
-    }, 2000);
+    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      setError(err.message || "Registration failed.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

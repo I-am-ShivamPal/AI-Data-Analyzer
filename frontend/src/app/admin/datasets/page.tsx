@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -337,7 +338,8 @@ export default function AdminDatasetsPage() {
   const uniqueOwners = Array.from(new Set(MOCK_DATASETS.map(d => d.email)));
 
   return (
-    <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden font-sans selection:bg-cyan-500/30">
+    <ProtectedRoute>
+      <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden font-sans selection:bg-cyan-500/30">
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-900/5 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-indigo-900/5 blur-[100px]" />
@@ -1099,6 +1101,7 @@ export default function AdminDatasetsPage() {
         )}
       </Modal>
 
-    </div>
+        </div>
+    </ProtectedRoute>
   );
 }

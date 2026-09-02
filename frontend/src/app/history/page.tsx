@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import {
   LayoutDashboard,
   Database,
@@ -514,7 +515,8 @@ export default function HistoryPage() {
   ];
 
   return (
-    <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden">
+    <ProtectedRoute>
+      <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden">
       
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
@@ -818,5 +820,6 @@ export default function HistoryPage() {
       <DeleteModal record={deleteRecord} onClose={() => setDeleteRecord(null)} onConfirm={confirmDelete} />
 
     </div>
+    </ProtectedRoute>
   );
 }

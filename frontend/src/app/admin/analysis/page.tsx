@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -283,7 +284,8 @@ export default function AdminAnalysisPage() {
   };
 
   return (
-    <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden font-sans selection:bg-cyan-500/30">
+    <ProtectedRoute>
+      <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden font-sans selection:bg-cyan-500/30">
       {/* Background glows */}
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-900/5 blur-[120px]" />
@@ -869,6 +871,7 @@ export default function AdminAnalysisPage() {
         )}
       </Modal>
 
-    </div>
+        </div>
+    </ProtectedRoute>
   );
 }

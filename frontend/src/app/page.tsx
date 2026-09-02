@@ -1,5 +1,9 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/providers/AuthProvider';
 import { 
   BarChart3, 
   Database, 
@@ -18,6 +22,18 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleStartAction = () => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-blue-500/30 overflow-x-hidden">
       
@@ -49,10 +65,13 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-4">
-              <button className="text-sm font-medium text-slate-300 hover:text-white transition-colors px-4 py-2 border border-white/10 rounded-lg hover:bg-white/5">
+              <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors px-4 py-2 border border-white/10 rounded-lg hover:bg-white/5">
                 Login
-              </button>
-              <button className="text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_-3px_rgba(37,99,235,0.4)]">
+              </Link>
+              <button 
+                onClick={handleStartAction}
+                className="text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_-3px_rgba(37,99,235,0.4)]"
+              >
                 Get Started
               </button>
             </div>
@@ -85,7 +104,10 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <button className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(37,99,235,0.5)] flex items-center justify-center gap-2 group">
+            <button 
+              onClick={handleStartAction}
+              className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(37,99,235,0.5)] flex items-center justify-center gap-2 group"
+            >
               Start Analyzing
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -340,7 +362,10 @@ export default function LandingPage() {
               <p className="text-slate-400 text-lg mb-10">
                 Start analyzing your datasets instantly with AI DATA ANALYZER.
               </p>
-              <button className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(37,99,235,0.5)]">
+              <button 
+                onClick={handleStartAction}
+                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(37,99,235,0.5)]"
+              >
                 Get Started
               </button>
             </div>
@@ -371,12 +396,46 @@ export default function LandingPage() {
             
             <div className="flex flex-col gap-3">
               <h4 className="text-white font-semibold mb-1">Authentication</h4>
-              <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">Login</Link>
-              <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">Register</Link>
+              <Link href="/login" className="text-sm text-slate-400 hover:text-white transition-colors">Login</Link>
+              <Link href="/register" className="text-sm text-slate-400 hover:text-white transition-colors">Register</Link>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Auth Required Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAuthModal(false)} />
+          <div className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                <Lock className="w-5 h-5 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Login Required</h3>
+            </div>
+            
+            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+              You must be logged into your account to access the AI Data Analyzer dashboard and workspace.
+            </p>
+            
+            <div className="flex flex-col gap-3">
+              <Link 
+                href="/login"
+                className="w-full flex items-center justify-center py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-[0_0_15px_-3px_rgba(37,99,235,0.4)]"
+              >
+                Sign In
+              </Link>
+              <Link 
+                href="/register"
+                className="w-full flex items-center justify-center py-2.5 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 font-medium border border-white/10 rounded-xl transition-colors"
+              >
+                Create Account
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

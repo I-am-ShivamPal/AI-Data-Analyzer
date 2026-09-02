@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import {
   LayoutDashboard,
   Database,
@@ -449,7 +450,8 @@ export default function AnalyzePage() {
   }
 
   return (
-    <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden">
+    <ProtectedRoute>
+      <div className="h-screen bg-[#070B14] text-slate-50 flex overflow-hidden">
       
       {/* Background glow */}
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
@@ -758,5 +760,6 @@ export default function AnalyzePage() {
         </main>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
